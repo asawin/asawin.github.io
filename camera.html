@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Resolution Capabilities Tester</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2d2d2d;
+            --text-primary: #f5f5f5;
+            --text-secondary: #b3b3b3;
+            --accent-color: #7289da;
+            --accent-hover: #5f73bc;
+            --success-color: #43b581;
+            --warning-color: #faa61a;
+            --error-color: #f04747;
+            --border-color: #383838;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        header {
+            background-color: var(--bg-secondary);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .logo i {
+            color: var(--accent-color);
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .header-right .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--warning-color);
+        }
+        
+        .status-indicator.connected {
+            background-color: var(--success-color);
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        h1, h2, h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-top: 1rem;
+        }
+        
+        h3 {
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        @media (min-width: 992px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .panel {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px var(--shadow-color);
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+        
+        .device-selector {
+            flex-grow: 1;
+            min-width: 200px;
+            max-width: 100%;
+            padding: 0.75rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .device-selector:focus {
+            border-color: var(--accent-color);
+        }
+        
+        label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        button:disabled {
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        button i {
+            font-size: 1rem;
+        }
+        
+        .video-container {
+            position: relative;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #000;
+            aspect-ratio: 4/3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        video {
+            max-width: 100%;
+            max-height: 100%;
+            background-color: #000;
+        }
+        
+        .camera-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+        
+        .camera-overlay i {
+            color: var(--accent-color);
+        }
+        
+        .current-resolution {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .no-camera {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-secondary);
+            gap: 1rem;
+        }
+        
+        .no-camera i {
+            font-size: 3rem;
+            opacity: 0.6;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+        }
+        
+        table th, table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        table th {
+            background-color: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        table tr.active-resolution {
+            background-color: rgba(114, 137, 218, 0.15);
+        }
+        
+        .status-pending {
+            color: var(--warning-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-success {
+            color: var(--success-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-fail {
+            color: var(--error-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .log-container {
+            height: 200px;
+            overflow-y: auto;
+            background-color: var(--bg-tertiary);
+            border-radius: 4px;
+            padding: 1rem;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .log-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .log-container::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+        
+        .log-container::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 4px;
+        }
+        
+        .test-custom {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+        
+        .test-custom input {
+            width: 80px;
+            padding: 0.75rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+        }
+        
+        .test-custom span {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        #download-photo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #2196F3;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            text-align: center;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        
+        #download-photo:hover {
+            background-color: #0d8aee;
+        }
+        
+        #download-photo:active {
+            transform: scale(0.98);
+        }
+        
+        #capture-result {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background-color: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+        
+        #captured-image {
+            max-width: 100%;
+            border-radius: 4px;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        
+        #capture-resolution {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        footer {
+            background-color: var(--bg-secondary);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        footer p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        footer .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        footer .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        footer .footer-links a:hover {
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-camera"></i>
+            <span>ProCam Resolution Tester</span>
+        </div>
+        <div class="header-right">
+            <div class="connection-status">
+                <div id="status-indicator" class="status-indicator"></div>
+                <span id="connection-status">No Camera</span>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <h1>Camera Resolution Capabilities Tester</h1>
+        
+        <div class="container">
+            <div class="panel">
+                <h2><i class="fas fa-video"></i> Camera Control</h2>
+                
+                <div class="controls">
+                    <select id="camera-select" class="device-selector">
+                        <option value="">Select a camera...</option>
+                    </select>
+                    <button id="refresh-cameras">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button id="get-capabilities">
+                        <i class="fas fa-info-circle"></i> Get Capabilities
+                    </button>
+                </div>
+                
+                <div class="controls">
+                    <label for="resolution-select">Resolution:</label>
+                    <select id="resolution-select" class="device-selector">
+                        <!-- Will be populated with JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="video-container">
+                    <div class="no-camera" id="no-camera-placeholder">
+                        <i class="fas fa-video-slash"></i>
+                        <p>Select and start a camera to view feed</p>
+                    </div>
+                    <video id="video" autoplay playsinline></video>
+                    <div class="camera-overlay" id="camera-info" style="display: none;">
+                        <i class="fas fa-circle"></i>
+                        <span id="camera-name">Camera</span>
+                    </div>
+                    <div class="current-resolution" id="resolution-display" style="display: none;">
+                        <span id="current-width">0</span> x <span id="current-height">0</span>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button id="start-camera">
+                        <i class="fas fa-play"></i> Start Camera
+                    </button>
+                    <button id="stop-camera" disabled>
+                        <i class="fas fa-stop"></i> Stop Camera
+                    </button>
+                    <button id="take-photo" disabled>
+                        <i class="fas fa-camera"></i> Take Photo
+                    </button>
+                </div>
+                
+                <div id="capture-result" style="display: none;">
+                    <h3><i class="fas fa-image"></i> Captured Image</h3>
+                    <p id="capture-resolution"></p>
+                    <img id="captured-image" alt="Captured photo">
+                    <a id="download-photo" href="#" download="camera-snapshot.png" style="display: none;">
+                        <i class="fas fa-download"></i> <span>Download</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2><i class="fas fa-tasks"></i> Resolution Tests</h2>
+                <p>Test common resolutions to see if your camera supports them:</p>
+                
+                <div class="controls">
+                    <button id="test-all-resolutions">
+                        <i class="fas fa-play-circle"></i> Test All Resolutions
+                    </button>
+                </div>
+                
+                <div class="test-custom">
+                    <label>Test Custom Resolution:</label>
+                    <input type="number" id="custom-width" placeholder="Width" value="2592">
+                    <span>x</span>
+                    <input type="number" id="custom-height" placeholder="Height" value="1944">
+                    <button id="test-custom-resolution">
+                        <i class="fas fa-check"></i> Test
+                    </button>
+                </div>
+                
+                <table id="resolutions-table">
+                    <thead>
+                        <tr>
+                            <th>Resolution</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resolutions-body">
+                        <!-- Will be filled via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="panel full-width">
+                <h2><i class="fas fa-info-circle"></i> Camera Capabilities</h2>
+                <div id="camera-details">
+                    <p>Select a camera and click "Get Capabilities" to see detailed information.</p>
+                </div>
+                
+                <h3><i class="fas fa-terminal"></i> Log</h3>
+                <div id="log" class="log-container"></div>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="footer-links">
+            <a href="#" title="About">About</a>
+            <a href="#" title="Privacy Policy">Privacy Policy</a>
+            <a href="#" title="Terms of Service">Terms of Service</a>
+            <a href="#" title="Contact">Contact</a>
+        </div>
+        <p>&copy; 2025 ProCam Resolution Tester. All rights reserved.</p>
+    </footer>
+    
+    <canvas id="canvas" style="display:none;"></canvas>
+    
+    <script>
+        // DOM Elements
+        const videoElement = document.getElementById('video');
+        const cameraSelect = document.getElementById('camera-select');
+        const startCameraBtn = document.getElementById('start-camera');
+        const stopCameraBtn = document.getElementById('stop-camera');
+        const takePhotoBtn = document.getElementById('take-photo');
+        const refreshCamerasBtn = document.getElementById('refresh-cameras');
+        const getCapabilitiesBtn = document.getElementById('get-capabilities');
+        const testAllResolutionsBtn = document.getElementById('test-all-resolutions');
+        const testCustomResolutionBtn = document.getElementById('test-custom-resolution');
+        const customWidthInput = document.getElementById('custom-width');
+        const customHeightInput = document.getElementById('custom-height');
+        const resolutionsTable = document.getElementById('resolutions-table');
+        const resolutionsBody = document.getElementById('resolutions-body');
+        const cameraDetails = document.getElementById('camera-details');
+        const logElement = document.getElementById('log');
+        const currentWidth = document.getElementById('current-width');
+        const currentHeight = document.getElementById('current-height');
+        const captureResult = document.getElementById('capture-result');
+        const capturedImage = document.getElementById('captured-image');
+        const captureResolution = document.getElementById('capture-resolution');
+        const canvas = document.getElementById('canvas');
+        const statusIndicator = document.getElementById('status-indicator');
+        const connectionStatus = document.getElementById('connection-status');
+        const cameraNameElement = document.getElementById('camera-name');
+        const cameraInfoElement = document.getElementById('camera-info');
+        const resolutionDisplayElement = document.getElementById('resolution-display');
+        const noCameraPlaceholder = document.getElementById('no-camera-placeholder');
+        
+        // Global variables
+        let stream = null;
+        let currentCamera = null;
+        
+        // Common resolutions to test
+        const commonResolutions = [
+            { width: 320, height: 240, name: 'QVGA' },
+            { width: 640, height: 480, name: 'VGA' },
+            { width: 800, height: 600, name: 'SVGA' },
+            { width: 1024, height: 768, name: 'XGA' },
+            { width: 1280, height: 720, name: '720p HD' },
+            { width: 1280, height: 960, name: '1.2MP' },
+            { width: 1600, height: 1200, name: '2MP' },
+            { width: 1920, height: 1080, name: '1080p Full HD' },
+            { width: 2048, height: 1536, name: '3MP' },
+            { width: 2272, height: 1704, name: '4MP' },
+            { width: 2560, height: 1920, name: '5MP (2560x1920)' },
+            { width: 2592, height: 1944, name: '5MP (2592x1944)' },
+            { width: 3264, height: 2448, name: '8MP' },
+            { width: 4000, height: 3000, name: '12MP' },
+        ];
+        
+        // Logging function
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        // Initialize
+        async function init() {
+            populateResolutionsTable();
+            populateResolutionDropdown();
+            await enumerateDevices();
+            
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                log('ERROR: getUserMedia is not supported in this browser.');
+                alert('Camera access is not supported in your browser.');
+                disableControls();
+                updateConnectionStatus('error', 'API Not Supported');
+                return;
+            }
+            
+            log('Camera API is supported in this browser.');
+            updateConnectionStatus('standby', 'Ready');
+            
+            // Setup event listeners
+            videoElement.addEventListener('loadedmetadata', updateCurrentResolution);
+            startCameraBtn.addEventListener('click', startCamera);
+            stopCameraBtn.addEventListener('click', stopCamera);
+            refreshCamerasBtn.addEventListener('click', enumerateDevices);
+            getCapabilitiesBtn.addEventListener('click', showCameraCapabilities);
+            testAllResolutionsBtn.addEventListener('click', testAllResolutions);
+            testCustomResolutionBtn.addEventListener('click', testCustomResolution);
+            takePhotoBtn.addEventListener('click', takePhoto);
+            document.getElementById('resolution-select').addEventListener('change', changeResolution);
+        }
+        
+        // Update connection status indicator
+        function updateConnectionStatus(state, text) {
+            connectionStatus.textContent = text;
+            
+            switch(state) {
+                case 'connected':
+                    statusIndicator.className = 'status-indicator connected';
+                    break;
+                case 'error':
+                    statusIndicator.className = 'status-indicator';
+                    statusIndicator.style.backgroundColor = 'var(--error-color)';
+                    break;
+                case 'standby':
+                default:
+                    statusIndicator.className = 'status-indicator';
+                    statusIndicator.style.backgroundColor = 'var(--warning-color)';
+            }
+        }
+        
+        // Populate the resolution dropdown
+        function populateResolutionDropdown() {
+            const resolutionSelect = document.getElementById('resolution-select');
+            resolutionSelect.innerHTML = ''; // Clear existing options
+            
+            // Add default option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.text = 'Default';
+            resolutionSelect.appendChild(defaultOption);
+            
+            // Add all common resolutions to dropdown
+            commonResolutions.forEach((res) => {
+                const option = document.createElement('option');
+                option.value = `${res.width}x${res.height}`;
+                option.text = `${res.width}x${res.height} (${res.name})`;
+                resolutionSelect.appendChild(option);
+            });
+        }
+        
+        // Populate the resolutions table
+        function populateResolutionsTable() {
+            resolutionsBody.innerHTML = ''; // Clear existing rows
+            
+            commonResolutions.forEach((res, index) => {
+                const row = document.createElement('tr');
+                row.id = `resolution-row-${index}`;
+                row.innerHTML = `
+                    <td>${res.width} x ${res.height}</td>
+                    <td>${res.name}</td>
+                    <td id="status-${index}" class="status-pending">
+                        <i class="fas fa-clock"></i> Pending
+                    </td>
+                    <td>
+                        <button id="test-${index}" onclick="testSingleResolution(${res.width}, ${res.height}, ${index})">
+                            <i class="fas fa-vial"></i> Test
+                        </button>
+                    </td>
+                `;
+                resolutionsBody.appendChild(row);
+            });
+        }
+        
+        // Enumerate video devices
+        async function enumerateDevices() {
+            try {
+                log('Searching for video devices...');
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                
+                cameraSelect.innerHTML = '<option value="">Select a camera...</option>';
+                
+                if (videoDevices.length === 0) {
+                    log('No video devices found.');
+                    updateConnectionStatus('error', 'No Cameras');
+                    return;
+                }
+                
+                log(`Found ${videoDevices.length} video device(s)`);
+                updateConnectionStatus('standby', 'Camera Available');
+                
+                videoDevices.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Camera ${index + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+                
+                // Request permission if camera labels are not available
+                if (!videoDevices[0].label) {
+                    log('Requesting camera permission to see device labels...');
+                    const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    tempStream.getTracks().forEach(track => track.stop());
+                    // Re-enumerate to get labels
+                    enumerateDevices();
+                }
+            } catch (error) {
+                log(`Error enumerating devices: ${error.message}`);
+                console.error('Error enumerating devices:', error);
+                updateConnectionStatus('error', 'Access Error');
+            }
+        }
+        
+        // Start camera with selected device and resolution
+        async function startCamera() {
+            try {
+                const deviceId = cameraSelect.value;
+                
+                if (!deviceId) {
+                    alert('Please select a camera first.');
+                    return;
+                }
+                
+                // Stop any existing stream
+                if (stream) {
+                    stopCamera();
+                }
+                
+                log(`Attempting to start camera with deviceId: ${deviceId}`);
+                
+                // Check if a resolution is selected
+                const resolutionSelect = document.getElementById('resolution-select');
+                const selectedResolution = resolutionSelect.value;
+                
+                let constraints;
+                
+                if (selectedResolution) {
+                    // Parse the resolution
+                    const [width, height] = selectedResolution.split('x').map(Number);
+                    log(`Requesting camera with resolution: ${width}x${height}`);
+                    
+                    constraints = {
+                        video: {
+                            deviceId: { exact: deviceId },
+                            width: { ideal: width },
+                            height: { ideal: height }
+                        }
+                    };
+                } else {
+                    // Start with default constraints
+                    constraints = {
+                        video: { deviceId: { exact: deviceId } }
+                    };
+                }
+                
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoElement.srcObject = stream;
+                currentCamera = deviceId;
+                
+                // Get camera name for display
+                const videoTrack = stream.getVideoTracks()[0];
+                cameraNameElement.textContent = videoTrack.label || 'Camera';
+                
+                // Show camera info and hide placeholder
+                cameraInfoElement.style.display = 'flex';
+                resolutionDisplayElement.style.display = 'block';
+                noCameraPlaceholder.style.display = 'none';
+                
+                log('Camera started successfully');
+                updateConnectionStatus('connected', 'Connected');
+                
+                startCameraBtn.disabled = true;
+                stopCameraBtn.disabled = false;
+                takePhotoBtn.disabled = false;
+                
+                // Update UI
+                updateCurrentResolution();
+                
+            } catch (error) {
+                log(`Error starting camera: ${error.message}`);
+                console.error('Error starting camera:', error);
+                alert(`Failed to start camera: ${error.message}`);
+                updateConnectionStatus('error', 'Connection Failed');
+            }
+        }
+        
+        // Change resolution of active camera
+        async function changeResolution() {
+            if (!stream || !currentCamera) {
+                // If camera isn't active, just return - resolution will be applied when camera starts
+                return;
+            }
+            
+            const resolutionSelect = document.getElementById('resolution-select');
+            const selectedResolution = resolutionSelect.value;
+            
+            if (!selectedResolution) {
+                return;
+            }
+            
+            // Parse the resolution
+            const [width, height] = selectedResolution.split('x').map(Number);
+            log(`Changing resolution to: ${width}x${height}`);
+            
+            try {
+                // Show loading indicator
+                updateConnectionStatus('standby', 'Changing Resolution...');
+                
+                // Stop current stream
+                stream.getTracks().forEach(track => track.stop());
+                videoElement.srcObject = null;
+                
+                // Start new stream with selected resolution
+                const constraints = {
+                    video: {
+                        deviceId: { exact: currentCamera },
+                        width: { ideal: width },
+                        height: { ideal: height }
+                    }
+                };
+                
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoElement.srcObject = stream;
+                
+                // Get camera name for display
+                const videoTrack = stream.getVideoTracks()[0];
+                cameraNameElement.textContent = videoTrack.label || 'Camera';
+                
+                log(`Resolution changed to ${width}x${height}`);
+                updateCurrentResolution();
+                updateConnectionStatus('connected', 'Connected');
+                
+            } catch (error) {
+                log(`Error changing resolution: ${error.message}`);
+                console.error('Error changing resolution:', error);
+                
+                // Try to restart with default settings
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { deviceId: { exact: currentCamera } }
+                    });
+                    videoElement.srcObject = stream;
+                    updateCurrentResolution();
+                    updateConnectionStatus('connected', 'Connected (Default)');
+                } catch (e) {
+                    log(`Could not restart camera with default settings: ${e.message}`);
+                    stopCamera();
+                    updateConnectionStatus('error', 'Connection Lost');
+                }
+            }
+        }
+        
+        // Stop camera
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                videoElement.srcObject = null;
+                stream = null;
+                log('Camera stopped');
+                
+                startCameraBtn.disabled = false;
+                stopCameraBtn.disabled = true;
+                takePhotoBtn.disabled = true;
+                
+                currentWidth.textContent = '0';
+                currentHeight.textContent = '0';
+                
+                // Hide camera info and show placeholder
+                cameraInfoElement.style.display = 'none';
+                resolutionDisplayElement.style.display = 'none';
+                noCameraPlaceholder.style.display = 'flex';
+                
+                // Hide download link
+                const downloadLink = document.getElementById('download-photo');
+                downloadLink.style.display = 'none';
+                
+                // Reset any row highlighting
+                const rows = resolutionsBody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    row.classList.remove('active-resolution');
+                });
+                
+                updateConnectionStatus('standby', 'Disconnected');
+            }
+        }
+        
+        // Update current resolution display
+        function updateCurrentResolution() {
+            if (videoElement.videoWidth && videoElement.videoHeight) {
+                const width = videoElement.videoWidth;
+                const height = videoElement.videoHeight;
+                
+                currentWidth.textContent = width;
+                currentHeight.textContent = height;
+                log(`Camera resolution set to: ${width} x ${height}`);
+                
+                // Update resolution dropdown to match current resolution if possible
+                const resolutionSelect = document.getElementById('resolution-select');
+                const matchingOption = `${width}x${height}`;
+                
+                let found = false;
+                for (let i = 0; i < resolutionSelect.options.length; i++) {
+                    if (resolutionSelect.options[i].value === matchingOption) {
+                        resolutionSelect.selectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                
+                // Highlight the current resolution in the table
+                highlightCurrentResolution(width, height);
+                
+                if (!found && isResolutionInTable(width, height)) {
+                    // If the resolution should be in the dropdown but isn't,
+                    // repopulate the dropdown (this shouldn't normally happen)
+                    populateResolutionDropdown();
+                    // Try again to set the selected option
+                    for (let i = 0; i < resolutionSelect.options.length; i++) {
+                        if (resolutionSelect.options[i].value === matchingOption) {
+                            resolutionSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Show camera capabilities
+        async function showCameraCapabilities() {
+            try {
+                if (!currentCamera) {
+                    // If no camera is active, try to start one
+                    if (cameraSelect.value) {
+                        await startCamera();
+                    } else {
+                        alert('Please select and start a camera first.');
+                        return;
+                    }
+                }
+                
+                if (!stream) {
+                    log('No active camera stream to get capabilities from.');
+                    return;
+                }
+                
+                const videoTrack = stream.getVideoTracks()[0];
+                if (!videoTrack) {
+                    log('No video track found in stream.');
+                    return;
+                }
+                
+                // Get capabilities
+                const capabilities = videoTrack.getCapabilities();
+                log('Retrieved camera capabilities');
+                console.log('Camera capabilities:', capabilities);
+                
+                // Display capabilities in a formatted way
+                let html = '<h3><i class="fas fa-cog"></i> Camera Capabilities</h3>';
+                
+                if (capabilities) {
+                    if (capabilities.width && capabilities.height) {
+                        html += `<p><strong>Resolution Range:</strong> ${capabilities.width.min}x${capabilities.height.min} to ${capabilities.width.max}x${capabilities.height.max}</p>`;
+                    }
+                    
+                    if (capabilities.aspectRatio) {
+                        html += `<p><strong>Aspect Ratio Range:</strong> ${capabilities.aspectRatio.min} to ${capabilities.aspectRatio.max}</p>`;
+                    }
+                    
+                    if (capabilities.frameRate) {
+                        html += `<p><strong>Frame Rate Range:</strong> ${capabilities.frameRate.min} to ${capabilities.frameRate.max} fps</p>`;
+                    }
+                    
+                    // Add other capabilities if available
+                    if (capabilities.facingMode) {
+                        html += `<p><strong>Facing Mode:</strong> ${capabilities.facingMode.join(', ')}</p>`;
+                    }
+                    
+                    if (capabilities.resizeMode) {
+                        html += `<p><strong>Resize Mode:</strong> ${capabilities.resizeMode.join(', ')}</p>`;
+                    }
+                    
+                    // Current settings
+                    const settings = videoTrack.getSettings();
+                    html += '<h3><i class="fas fa-sliders-h"></i> Current Settings</h3>';
+                    html += `<p><strong>Resolution:</strong> ${settings.width}x${settings.height}</p>`;
+                    
+                    if (settings.frameRate) {
+                        html += `<p><strong>Frame Rate:</strong> ${settings.frameRate} fps</p>`;
+                    }
+                    
+                    if (settings.facingMode) {
+                        html += `<p><strong>Facing Mode:</strong> ${settings.facingMode}</p>`;
+                    }
+                } else {
+                    html += '<p>Detailed capabilities not available for this camera/browser.</p>';
+                }
+                
+                cameraDetails.innerHTML = html;
+                
+            } catch (error) {
+                log(`Error getting camera capabilities: ${error.message}`);
+                console.error('Error getting camera capabilities:', error);
+            }
+        }
+        
+        // Test a single resolution
+        async function testSingleResolution(width, height, index) {
+            const statusElement = document.getElementById(`status-${index}`);
+            const buttonElement = document.getElementById(`test-${index}`);
+            
+            if (!cameraSelect.value) {
+                alert('Please select a camera first.');
+                return;
+            }
+            
+            statusElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+            statusElement.className = 'status-pending';
+            buttonElement.disabled = true;
+            
+            log(`Testing resolution ${width}x${height}...`);
+            
+            try {
+                // Stop any existing stream
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    videoElement.srcObject = null;
+                }
+                
+                // Update connection status
+                updateConnectionStatus('standby', 'Testing Resolution...');
+                
+                // Try with exact constraints
+                const constraints = {
+                    video: {
+                        deviceId: { exact: cameraSelect.value },
+                        width: { exact: width },
+                        height: { exact: height }
+                    }
+                };
+                
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoElement.srcObject = stream;
+                
+                // Get camera name for display
+                const videoTrack = stream.getVideoTracks()[0];
+                cameraNameElement.textContent = videoTrack.label || 'Camera';
+                
+                // Show camera info and hide placeholder
+                cameraInfoElement.style.display = 'flex';
+                resolutionDisplayElement.style.display = 'block';
+                noCameraPlaceholder.style.display = 'none';
+                
+                // Wait for video to load
+                await new Promise(resolve => {
+                    videoElement.onloadedmetadata = resolve;
+                    // Add timeout in case onloadedmetadata doesn't fire
+                    setTimeout(resolve, 1000);
+                });
+                
+                // Check if we got the exact resolution
+                if (videoElement.videoWidth === width && videoElement.videoHeight === height) {
+                    statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Supported';
+                    statusElement.className = 'status-success';
+                    log(`Resolution ${width}x${height} is SUPPORTED`);
+                    updateConnectionStatus('connected', 'Connected');
+                } else {
+                    statusElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Adjusted to ${videoElement.videoWidth}x${videoElement.videoHeight}`;
+                    statusElement.className = 'status-fail';
+                    log(`Resolution ${width}x${height} adjusted to ${videoElement.videoWidth}x${videoElement.videoHeight}`);
+                    updateConnectionStatus('connected', 'Connected (Adjusted)');
+                }
+                
+                // Update current resolution display
+                updateCurrentResolution();
+                
+                // Enable camera controls
+                stopCameraBtn.disabled = false;
+                takePhotoBtn.disabled = false;
+                startCameraBtn.disabled = true;
+                
+            } catch (error) {
+                statusElement.innerHTML = '<i class="fas fa-times-circle"></i> Not Supported';
+                statusElement.className = 'status-fail';
+                log(`Resolution ${width}x${height} is NOT SUPPORTED: ${error.message}`);
+                console.error(`Error testing ${width}x${height}:`, error);
+                
+                // Try to restart camera with default settings
+                try {
+                    updateConnectionStatus('standby', 'Reconnecting...');
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { deviceId: { exact: cameraSelect.value } }
+                    });
+                    videoElement.srcObject = stream;
+                    
+                    // Get camera name for display
+                    const videoTrack = stream.getVideoTracks()[0];
+                    cameraNameElement.textContent = videoTrack.label || 'Camera';
+                    
+                    // Show camera info and hide placeholder
+                    cameraInfoElement.style.display = 'flex';
+                    resolutionDisplayElement.style.display = 'block';
+                    noCameraPlaceholder.style.display = 'none';
+                    
+                    stopCameraBtn.disabled = false;
+                    takePhotoBtn.disabled = false;
+                    startCameraBtn.disabled = true;
+                    updateCurrentResolution();
+                    updateConnectionStatus('connected', 'Connected (Default)');
+                } catch (e) {
+                    log(`Could not restart camera with default settings: ${e.message}`);
+                    stopCameraBtn.disabled = true;
+                    takePhotoBtn.disabled = true;
+                    startCameraBtn.disabled = false;
+                    
+                    // Hide camera info and show placeholder
+                    cameraInfoElement.style.display = 'none';
+                    resolutionDisplayElement.style.display = 'none';
+                    noCameraPlaceholder.style.display = 'flex';
+                    
+                    updateConnectionStatus('error', 'Connection Failed');
+                }
+            } finally {
+                buttonElement.disabled = false;
+            }
+        }
+        
+        // Test custom resolution
+        async function testCustomResolution() {
+            const width = parseInt(customWidthInput.value);
+            const height = parseInt(customHeightInput.value);
+            
+            if (!width || !height || width <= 0 || height <= 0) {
+                alert('Please enter valid width and height values.');
+                return;
+            }
+            
+            log(`Testing custom resolution ${width}x${height}...`);
+            
+            try {
+                if (!cameraSelect.value) {
+                    alert('Please select a camera first.');
+                    return;
+                }
+                
+                // Stop any existing stream
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    videoElement.srcObject = null;
+                }
+                
+                // Update connection status
+                updateConnectionStatus('standby', 'Testing Custom Resolution...');
+                
+                // Try with exact constraints
+                const constraints = {
+                    video: {
+                        deviceId: { exact: cameraSelect.value },
+                        width: { exact: width },
+                        height: { exact: height }
+                    }
+                };
+                
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoElement.srcObject = stream;
+                
+                // Get camera name for display
+                const videoTrack = stream.getVideoTracks()[0];
+                cameraNameElement.textContent = videoTrack.label || 'Camera';
+                
+                // Show camera info and hide placeholder
+                cameraInfoElement.style.display = 'flex';
+                resolutionDisplayElement.style.display = 'block';
+                noCameraPlaceholder.style.display = 'none';
+                
+                // Wait for video to load
+                await new Promise(resolve => {
+                    videoElement.onloadedmetadata = resolve;
+                    setTimeout(resolve, 1000);
+                });
+                
+                // Check if we got the exact resolution
+                if (videoElement.videoWidth === width && videoElement.videoHeight === height) {
+                    log(`Custom resolution ${width}x${height} is SUPPORTED`);
+                    alert(`Success! Resolution ${width}x${height} is supported.`);
+                    updateConnectionStatus('connected', 'Connected');
+                } else {
+                    log(`Custom resolution ${width}x${height} adjusted to ${videoElement.videoWidth}x${videoElement.videoHeight}`);
+                    alert(`Camera adjusted resolution to ${videoElement.videoWidth}x${videoElement.videoHeight}`);
+                    updateConnectionStatus('connected', 'Connected (Adjusted)');
+                }
+                
+                // Update current resolution display
+                updateCurrentResolution();
+                
+                // Enable camera controls
+                stopCameraBtn.disabled = false;
+                takePhotoBtn.disabled = false;
+                startCameraBtn.disabled = true;
+                
+            } catch (error) {
+                log(`Custom resolution ${width}x${height} is NOT SUPPORTED: ${error.message}`);
+                console.error(`Error testing ${width}x${height}:`, error);
+                alert(`Resolution ${width}x${height} is not supported by this camera.`);
+                updateConnectionStatus('error', 'Test Failed');
+                
+                // Try to restart camera with default settings
+                try {
+                    updateConnectionStatus('standby', 'Reconnecting...');
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { deviceId: { exact: cameraSelect.value } }
+                    });
+                    videoElement.srcObject = stream;
+                    
+                    // Get camera name for display
+                    const videoTrack = stream.getVideoTracks()[0];
+                    cameraNameElement.textContent = videoTrack.label || 'Camera';
+                    
+                    // Show camera info and hide placeholder
+                    cameraInfoElement.style.display = 'flex';
+                    resolutionDisplayElement.style.display = 'block';
+                    noCameraPlaceholder.style.display = 'none';
+                    
+                    stopCameraBtn.disabled = false;
+                    takePhotoBtn.disabled = false;
+                    startCameraBtn.disabled = true;
+                    updateCurrentResolution();
+                    updateConnectionStatus('connected', 'Connected (Default)');
+                } catch (e) {
+                    log(`Could not restart camera with default settings: ${e.message}`);
+                    stopCameraBtn.disabled = true;
+                    takePhotoBtn.disabled = true;
+                    startCameraBtn.disabled = false;
+                    
+                    // Hide camera info and show placeholder
+                    cameraInfoElement.style.display = 'none';
+                    resolutionDisplayElement.style.display = 'none';
+                    noCameraPlaceholder.style.display = 'flex';
+                    
+                    updateConnectionStatus('error', 'Connection Failed');
+                }
+            }
+        }
+        
+        // Test all common resolutions
+        async function testAllResolutions() {
+            if (!cameraSelect.value) {
+                alert('Please select a camera first.');
+                return;
+            }
+            
+            testAllResolutionsBtn.disabled = true;
+            testAllResolutionsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+            log('Testing all common resolutions...');
+            
+            for (let i = 0; i < commonResolutions.length; i++) {
+                const res = commonResolutions[i];
+                
+                // Update status to testing
+                const statusElement = document.getElementById(`status-${i}`);
+                statusElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+                statusElement.className = 'status-pending';
+                
+                // Test resolution
+                await testSingleResolution(res.width, res.height, i);
+                
+                // Small delay between tests
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            log('Finished testing all resolutions.');
+            testAllResolutionsBtn.disabled = false;
+            testAllResolutionsBtn.innerHTML = '<i class="fas fa-play-circle"></i> Test All Resolutions';
+        }
+        
+        // Take a photo
+        function takePhoto() {
+            if (!stream) {
+                alert('Camera is not active');
+                return;
+            }
+            
+            // Get the resolution currently being used
+            const currentWidth = videoElement.videoWidth;
+            const currentHeight = videoElement.videoHeight;
+            
+            // Get the selected resolution from dropdown
+            const resolutionSelect = document.getElementById('resolution-select');
+            const selectedResolution = resolutionSelect.value;
+            
+            // Parse target dimensions
+            let targetWidth = currentWidth;
+            let targetHeight = currentHeight;
+            let isUpscaled = false;
+            
+            if (selectedResolution) {
+                const [width, height] = selectedResolution.split('x').map(Number);
+                targetWidth = width;
+                targetHeight = height;
+            }
+            
+            // Check if we need to apply the special 2592x1944 case
+            const needsUpscaling = (targetWidth === 2592 && targetHeight === 1944) && 
+                                  (currentWidth !== 2592 || currentHeight !== 1944);
+            
+            // Set canvas dimensions based on target or current resolution
+            if (needsUpscaling) {
+                canvas.width = 2592;
+                canvas.height = 1944;
+                isUpscaled = true;
+            } else {
+                canvas.width = currentWidth;
+                canvas.height = currentHeight;
+            }
+            
+            // Draw video frame to canvas
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (needsUpscaling) {
+                // Use better quality settings for upscaling
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                
+                // Draw the video frame with upscaling
+                ctx.drawImage(videoElement, 0, 0, currentWidth, currentHeight, 0, 0, 2592, 1944);
+                log(`Upscaled photo from ${currentWidth}x${currentHeight} to 2592x1944`);
+            } else {
+                // Regular capture at current resolution
+                ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            }
+            
+            // Convert to image URL
+            const imageUrl = canvas.toDataURL('image/png');
+            capturedImage.src = imageUrl;
+            
+            // Enable download link
+            const downloadLink = document.getElementById('download-photo');
+            downloadLink.href = imageUrl;
+            
+            const filename = isUpscaled ? 
+                `photo_2592x1944_upscaled.png` : 
+                `photo_${canvas.width}x${canvas.height}.png`;
+            
+            downloadLink.download = filename;
+            downloadLink.style.display = 'inline-flex';
+            
+            const buttonText = isUpscaled ? 
+                `Download (2592x1944 - Upscaled)` : 
+                `Download (${canvas.width}x${canvas.height})`;
+            
+            downloadLink.innerHTML = `<i class="fas fa-download"></i> <span>${buttonText}</span>`;
+            
+            // Show capture result
+            captureResult.style.display = 'block';
+            
+            const resolutionText = isUpscaled ? 
+                `Captured at ${currentWidth}x${currentHeight}, upscaled to 2592x1944` : 
+                `Captured at ${canvas.width}x${canvas.height}`;
+            
+            captureResolution.innerHTML = `<i class="fas fa-info-circle"></i> ${resolutionText}`;
+            
+            log(resolutionText);
+        }
+        
+        // Disable controls when API is not supported
+        function disableControls() {
+            startCameraBtn.disabled = true;
+            stopCameraBtn.disabled = true;
+            refreshCamerasBtn.disabled = true;
+            getCapabilitiesBtn.disabled = true;
+            testAllResolutionsBtn.disabled = true;
+            testCustomResolutionBtn.disabled = true;
+            takePhotoBtn.disabled = true;
+            document.getElementById('resolution-select').disabled = true;
+        }
+        
+        // Helper function to check if a specific resolution is supported
+        function isResolutionInTable(width, height) {
+            const found = commonResolutions.find(res => res.width === width && res.height === height);
+            return !!found;
+        }
+        
+        // Helper function to highlight the current resolution in the table
+        function highlightCurrentResolution(width, height) {
+            // Reset all highlights
+            const rows = resolutionsBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                row.classList.remove('active-resolution');
+            });
+            
+            // Find the matching resolution and highlight it
+            for (let i = 0; i < commonResolutions.length; i++) {
+                const res = commonResolutions[i];
+                if (res.width === width && res.height === height) {
+                    const row = document.getElementById(`resolution-row-${i}`);
+                    if (row) {
+                        row.classList.add('active-resolution');
+                    }
+                    break;
+                }
+            }
+        }
+        
+        // Make functions available globally for event handlers
+        window.testSingleResolution = testSingleResolution;
+        
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
